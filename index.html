@@ -290,6 +290,86 @@
             animation: pulse 2s infinite;
         }
         
+        /* أنماط قسم التقدم */
+        .progress-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .progress-section h2 {
+            color: #3f51b5;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+        
+        .progress-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .progress-item {
+            margin-bottom: 15px;
+        }
+        
+        .progress-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        .progress-bar-container {
+            height: 25px;
+            background-color: #f0f0f0;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #4a6bff 0%, #3f51b5 100%);
+            border-radius: 20px;
+            width: 0%;
+            transition: width 1s ease-in-out;
+        }
+        
+        .progress-percentage {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #333;
+            font-weight: bold;
+            text-shadow: 0 0 2px rgba(255, 255, 255, 0.7);
+        }
+        
+        /* ألوان المواد */
+        .math-color {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+        }
+        
+        .physics-color {
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+        }
+        
+        .chemistry-color {
+            background: linear-gradient(135deg, #9C27B0 0%, #6A1B9A 100%);
+        }
+        
+        .arabic-color {
+            background: linear-gradient(135deg, #FF9800 0%, #E65100 100%);
+        }
+        
+        .english-color {
+            background: linear-gradient(135deg, #F44336 0%, #B71C1C 100%);
+        }
+        
         @keyframes pulse {
             0% { box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3); }
             50% { box-shadow: 0 4px 20px rgba(244, 67, 54, 0.5); }
@@ -316,6 +396,10 @@
             
             h1 {
                 font-size: 1.8rem;
+            }
+            
+            .progress-container {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -347,6 +431,59 @@
             <button id="prevDay">السابق</button>
             <select id="daySelect"></select>
             <button id="nextDay">التالي</button>
+        </div>
+        
+        <div class="progress-section">
+            <h2>مستوى التقدم</h2>
+            <div class="progress-container">
+                <div class="progress-item">
+                    <div class="progress-label">التقدم العام</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="totalProgress"></div>
+                        <span class="progress-percentage" id="totalProgressText">0%</span>
+                    </div>
+                </div>
+                
+                <div class="progress-item">
+                    <div class="progress-label">رياضيات</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar math-color" id="mathProgress"></div>
+                        <span class="progress-percentage" id="mathProgressText">0%</span>
+                    </div>
+                </div>
+                
+                <div class="progress-item">
+                    <div class="progress-label">فيزياء</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar physics-color" id="physicsProgress"></div>
+                        <span class="progress-percentage" id="physicsProgressText">0%</span>
+                    </div>
+                </div>
+                
+                <div class="progress-item">
+                    <div class="progress-label">كيمياء</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar chemistry-color" id="chemistryProgress"></div>
+                        <span class="progress-percentage" id="chemistryProgressText">0%</span>
+                    </div>
+                </div>
+                
+                <div class="progress-item">
+                    <div class="progress-label">عربي</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar arabic-color" id="arabicProgress"></div>
+                        <span class="progress-percentage" id="arabicProgressText">0%</span>
+                    </div>
+                </div>
+                
+                <div class="progress-item">
+                    <div class="progress-label">إنجليزي</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar english-color" id="englishProgress"></div>
+                        <span class="progress-percentage" id="englishProgressText">0%</span>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div class="tasks-grid" id="tasksGrid"></div>
@@ -439,6 +576,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // تحديث العدادات
     updateCountdowns();
     
+    // تحديث أشرطة التقدم
+    updateProgressBars();
+    
     // تحديث كل ثانية
     setInterval(updateCountdowns, 1000);
     
@@ -504,6 +644,9 @@ function loadUserProgress() {
     
     // عرض تاريخ البداية
     document.getElementById('startDate').textContent = 'تاريخ البداية: ' + formatDate(new Date(userProgress.startDate));
+    
+    // تحديث أشرطة التقدم
+    updateProgressBars();
 }
 
 // حفظ بيانات المستخدم في localStorage
@@ -699,6 +842,7 @@ function renderDayCards() {
             userProgress.tasks[i].morningCompleted = morningCheckbox.checked;
             saveUserProgress();
             renderDayCards();
+            updateProgressBars();
         });
         
         morningTask.appendChild(morningTime);
@@ -728,6 +872,7 @@ function renderDayCards() {
             userProgress.tasks[i].eveningCompleted = eveningCheckbox.checked;
             saveUserProgress();
             renderDayCards();
+            updateProgressBars();
         });
         
         eveningTask.appendChild(eveningTime);
@@ -792,6 +937,111 @@ function resetProgram() {
         localStorage.removeItem('studyScheduleProgress');
         location.reload();
     }
+}
+
+// تحديث أشرطة التقدم
+function updateProgressBars() {
+    // حساب التقدم العام
+    let totalTasks = 0;
+    let completedTasks = 0;
+    
+    // حساب التقدم لكل مادة
+    let subjects = {
+        math: { total: 0, completed: 0 },
+        physics: { total: 0, completed: 0 },
+        chemistry: { total: 0, completed: 0 },
+        arabic: { total: 0, completed: 0 },
+        english: { total: 0, completed: 0 }
+    };
+    
+    // مرور على جميع المهام وحساب التقدم
+    for (let i = 1; i <= 60; i++) {
+        const dayData = scheduleData.find(d => d.day === i);
+        const progressData = userProgress.tasks[i];
+        
+        if (dayData && progressData) {
+            // حساب المهام الصباحية
+            if (dayData.morning !== 'إجازة') {
+                totalTasks++;
+                if (progressData.morningCompleted) {
+                    completedTasks++;
+                }
+                
+                // تحديد المادة وإضافتها للحساب
+                if (dayData.morning.includes('رياضيات')) {
+                    subjects.math.total++;
+                    if (progressData.morningCompleted) subjects.math.completed++;
+                } else if (dayData.morning.includes('فيزياء')) {
+                    subjects.physics.total++;
+                    if (progressData.morningCompleted) subjects.physics.completed++;
+                } else if (dayData.morning.includes('كيمياء')) {
+                    subjects.chemistry.total++;
+                    if (progressData.morningCompleted) subjects.chemistry.completed++;
+                } else if (dayData.morning.includes('عربي')) {
+                    subjects.arabic.total++;
+                    if (progressData.morningCompleted) subjects.arabic.completed++;
+                } else if (dayData.morning.includes('إنجليزي')) {
+                    subjects.english.total++;
+                    if (progressData.morningCompleted) subjects.english.completed++;
+                }
+            }
+            
+            // حساب المهام المسائية
+            if (dayData.evening !== 'إجازة') {
+                totalTasks++;
+                if (progressData.eveningCompleted) {
+                    completedTasks++;
+                }
+                
+                // تحديد المادة وإضافتها للحساب
+                if (dayData.evening.includes('رياضيات')) {
+                    subjects.math.total++;
+                    if (progressData.eveningCompleted) subjects.math.completed++;
+                } else if (dayData.evening.includes('فيزياء')) {
+                    subjects.physics.total++;
+                    if (progressData.eveningCompleted) subjects.physics.completed++;
+                } else if (dayData.evening.includes('كيمياء')) {
+                    subjects.chemistry.total++;
+                    if (progressData.eveningCompleted) subjects.chemistry.completed++;
+                } else if (dayData.evening.includes('عربي')) {
+                    subjects.arabic.total++;
+                    if (progressData.eveningCompleted) subjects.arabic.completed++;
+                } else if (dayData.evening.includes('إنجليزي')) {
+                    subjects.english.total++;
+                    if (progressData.eveningCompleted) subjects.english.completed++;
+                }
+            }
+        }
+    }
+    
+    // حساب النسب المئوية وتحديث أشرطة التقدم
+    const totalPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    updateProgressBar('totalProgress', 'totalProgressText', totalPercentage);
+    
+    // تحديث تقدم كل مادة
+    updateSubjectProgress(subjects.math, 'mathProgress', 'mathProgressText');
+    updateSubjectProgress(subjects.physics, 'physicsProgress', 'physicsProgressText');
+    updateSubjectProgress(subjects.chemistry, 'chemistryProgress', 'chemistryProgressText');
+    updateSubjectProgress(subjects.arabic, 'arabicProgress', 'arabicProgressText');
+    updateSubjectProgress(subjects.english, 'englishProgress', 'englishProgressText');
+}
+
+// تحديث شريط تقدم مادة معينة
+function updateSubjectProgress(subject, barId, textId) {
+    const percentage = subject.total > 0 ? Math.round((subject.completed / subject.total) * 100) : 0;
+    updateProgressBar(barId, textId, percentage);
+}
+
+// تحديث شريط التقدم
+function updateProgressBar(barId, textId, percentage) {
+    const bar = document.getElementById(barId);
+    const text = document.getElementById(textId);
+    
+    // تحديث عرض الشريط
+    bar.style.width = percentage + '%';
+    
+    // تحديث النص
+    text.textContent = percentage + '%';
 }
 
 </script>
