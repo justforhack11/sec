@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مراقبة جدول المذاكرة</title>
+    <style>
+        /* تحسين استيراد الخط Cairo بأوزان متعددة */
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            font-weight: 400;
+            letter-spacing: 0.2px;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 25px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #4a6bff 0%, #2541b2 100%);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        h1 {
+            margin-bottom: 15px;
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .timer-section {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+        
+        .timer-box {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            width: 48%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .timer-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .timer-box h2 {
+            color: #3f51b5;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .timer-display {
+            font-size: 32px;
+            font-weight: bold;
+            color: #e91e63;
+            margin: 15px 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .date-display {
+            font-size: 18px;
+            margin-top: 10px;
+            color: #666;
+        }
+        
+        .tasks-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .day-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            position: relative;
+            border-top: 5px solid #e0e0e0;
+        }
+        
+        .day-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .day-card.active {
+            border-top: 5px solid #3f51b5;
+        }
+        
+        .day-card.completed {
+            border-top: 5px solid #4caf50;
+            background-color: #f9fff9;
+        }
+        
+        .day-card.missed {
+            border-top: 5px solid #f44336;
+            background-color: #fff9f9;
+        }
+        
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .day-number {
+            font-weight: bold;
+            font-size: 22px;
+            color: #3f51b5;
+        }
+        
+        .day-status {
+            font-size: 13px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .day-status.active {
+            background-color: #bbdefb;
+            color: #1976d2;
+        }
+        
+        .day-status.completed {
+            background-color: #c8e6c9;
+            color: #2e7d32;
+        }
+        
+        .day-status.missed {
+            background-color: #ffcdd2;
+            color: #c62828;
+        }
+        
+        .day-status.upcoming {
+            background-color: #e0e0e0;
+            color: #616161;
+        }
+        
+        .task-list {
+            margin-bottom: 15px;
+        }
+        
+        .task-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 8px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        
+        .task-time {
+            font-weight: bold;
+            margin-left: 10px;
+            min-width: 70px;
+            color: #555;
+        }
+        
+        .task-text {
+            flex-grow: 1;
+            padding: 0 10px;
+        }
+        
+        .task-checkbox {
+            margin-right: 5px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #3f51b5;
+        }
+        
+        .notes-area {
+            width: 100%;
+            resize: vertical;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            min-height: 80px;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: border 0.3s;
+        }
+        
+        .notes-area:focus {
+            outline: none;
+            border-color: #3f51b5;
+            box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2);
+        }
+        
+        .day-selector {
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .day-selector select {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background-color: white;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+        
+        .day-selector select:focus {
+            outline: none;
+            border-color: #3f51b5;
+            box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2);
+        }
+        
+        .day-selector button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #4a6bff 0%, #3f51b5 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .day-selector button:hover {
+            background: linear-gradient(135deg, #3f51b5 0%, #303f9f 100%);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .day-selector button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .alert-banner {
+            background: linear-gradient(135deg, #ff9a9e 0%, #f44336 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+            box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3); }
+            50% { box-shadow: 0 4px 20px rgba(244, 67, 54, 0.5); }
+            100% { box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3); }
+        }
+        
+        @media (max-width: 768px) {
+            .timer-section {
+                flex-direction: column;
+            }
+            
+            .timer-box {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            
+            .tasks-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .day-selector {
+                flex-wrap: wrap;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>مراقبة جدول المذاكرة 60 يوم</h1>
+            <p>تتبع تقدمك اليومي وحقق أهدافك</p>
+        </header>
+        
+        <div class="alert-banner" id="alertBanner"></div>
+        
+        <div class="timer-section">
+            <div class="timer-box">
+                <h2>العد التنازلي الإجمالي</h2>
+                <div class="timer-display" id="totalCountdown">60:00:00:00</div>
+                <div class="date-display" id="startDate">تاريخ البداية: --/--/----</div>
+            </div>
+            
+            <div class="timer-box">
+                <h2>الوقت المتبقي في اليوم الحالي</h2>
+                <div class="timer-display" id="dayCountdown">00:00:00</div>
+                <div class="date-display" id="currentDate">اليوم: --/--/----</div>
+            </div>
+        </div>
+        
+        <div class="day-selector">
+            <button id="prevDay">السابق</button>
+            <select id="daySelect"></select>
+            <button id="nextDay">التالي</button>
+        </div>
+        
+        <div class="tasks-grid" id="tasksGrid"></div>
+    </div>
+    
+    <script>
+// المتغيرات العامة
+let programStartDate = null;
+let currentSelectedDay = 1;
+let userProgress = {
+    currentDay: 1,
+    tasks: {}
+};
+
+// بيانات الجدول - قم بإضافة بياناتك هنا
+const scheduleData = [
+{day: 1, morning: "إنجليزي (Unit 1)", evening: "فيزياء (باب 1)"},
+      {day: 2, morning: "كيمياء (باب 1)", evening: "رياضيات (وحدة 1 - جزء 1)"},
+      {day: 3, morning: "عربي (وحدة 1)", evening: "رياضيات (وحدة 1 - جزء 2)"},
+      {day: 4, morning: "إنجليزي (Unit 2)", evening: "فيزياء (باب 2)"},
+      {day: 5, morning: "كيمياء (باب 2)", evening: "عربي (وحدة 2)"},
+      {day: 6, morning: "إجازة", evening: "إجازة"},
+      {day: 7, morning: "رياضيات (وحدة 2 - جزء 1)", evening: "إنجليزي (Unit 3)"},
+      {day: 8, morning: "فيزياء (باب 3)", evening: "عربي (وحدة 3)"},
+      {day: 9, morning: "كيمياء (باب 3)", evening: "رياضيات (وحدة 2 - جزء 2)"},
+      {day: 10, morning: "إنجليزي (Unit 4)", evening: "فيزياء (باب 4)"},
+      {day: 11, morning: "عربي (وحدة 4)", evening: "كيمياء (باب 4)"},
+      {day: 12, morning: "إجازة", evening: "إجازة"},
+      {day: 13, morning: "رياضيات (وحدة 3 - جزء 1)", evening: "إنجليزي (Unit 5)"},
+      {day: 14, morning: "فيزياء (باب 5)", evening: "عربي (وحدة 5)"},
+      {day: 15, morning: "كيمياء (باب 5)", evening: "رياضيات (وحدة 3 - جزء 2)"},
+      {day: 16, morning: "إنجليزي (Unit 6)", evening: "فيزياء (باب 6)"},
+      {day: 17, morning: "عربي (وحدة 6)", evening: "كيمياء (باب 6)"},
+      {day: 18, morning: "إجازة", evening: "إجازة"},
+      {day: 19, morning: "رياضيات (وحدة 4 - جزء 1)", evening: "إنجليزي (Unit 7)"},
+      {day: 20, morning: "فيزياء (باب 7)", evening: "عربي (وحدة 7)"},
+      {day: 21, morning: "كيمياء (مراجعة عامة)", evening: "رياضيات (وحدة 4 - جزء 2)"},
+      {day: 22, morning: "إنجليزي (Unit 8)", evening: "فيزياء (باب 8)"},
+      {day: 23, morning: "عربي (وحدة 8)", evening: "رياضيات (وحدة 5 - جزء 1)"},
+      {day: 24, morning: "إجازة", evening: "إجازة"},
+      {day: 25, morning: "كيمياء (مراجعة وحل مسائل)", evening: "إنجليزي (Unit 9)"},
+      {day: 26, morning: "فيزياء (مراجعة وحل مسائل)", evening: "رياضيات (وحدة 5 - جزء 2)"},
+      {day: 27, morning: "عربي (وحدة 9)", evening: "رياضيات (وحدة 6 - جزء 1)"},
+      {day: 28, morning: "إنجليزي (Unit 10)", evening: "فيزياء (مراجعة قوانين)"},
+      {day: 29, morning: "كيمياء (حل مسائل مركزة)", evening: "رياضيات (وحدة 6 - جزء 2)"},
+      {day: 30, morning: "إجازة", evening: "إجازة"},
+      {day: 31, morning: "عربي (وحدة 10)", evening: "إنجليزي (Unit 11)"},
+      {day: 32, morning: "فيزياء (تطبيقات وحل امتحانات)", evening: "رياضيات (حل مسائل نهائية)"},
+      {day: 33, morning: "كيمياء (مراجعة مركزة)", evening: "رياضيات (تطبيقات وتمارين)"},
+      {day: 34, morning: "إنجليزي (Unit 12)", evening: "فيزياء (تطبيقات)"},
+      {day: 35, morning: "عربي (مراجعة عامة)", evening: "كيمياء (تطبيقات)"},
+      {day: 36, morning: "إجازة", evening: "إجازة"},
+      {day: 37, morning: "رياضيات (مراجعة شاملة للوحدات)", evening: "إنجليزي (مراجعة نهائية)"},
+      {day: 38, morning: "فيزياء (حل امتحانات نهائية)", evening: "عربي (حل تدريبات)"},
+      {day: 39, morning: "كيمياء (حل امتحانات نهائية)", evening: "رياضيات (مراجعة أخيرة)"},
+      {day: 40, morning: "إجازة", evening: "إجازة"},
+      {day: 41, morning: "فيزياء (مراجعة مركزة)", evening: "عربي (مراجعة مركزة)"},
+      {day: 42, morning: "رياضيات (حل مسائل إضافية)", evening: "إنجليزي (مراجعة سريعة)"},
+      {day: 43, morning: "كيمياء (حل مسائل إضافية)", evening: "عربي (مراجعة عامة)"},
+      {day: 44, morning: "فيزياء (حل امتحانات إضافية)", evening: "رياضيات (مراجعة مركزة)"},
+      {day: 45, morning: "إجازة", evening: "إجازة"},
+      {day: 46, morning: "كيمياء (حل امتحانات)", evening: "عربي (تطبيقات وتمارين)"},
+      {day: 47, morning: "فيزياء (حل مسائل)", evening: "إنجليزي (مراجعة سريعة)"},
+      {day: 48, morning: "رياضيات (تمارين مركزة)", evening: "كيمياء (مراجعة أخيرة)"},
+      {day: 49, morning: "إجازة", evening: "إجازة"},
+      {day: 50, morning: "فيزياء (حل امتحانات شاملة)", evening: "عربي (مراجعة مركزة)"},
+      {day: 51, morning: "رياضيات (حل مسائل مكثفة)", evening: "إنجليزي (حل أسئلة)"},
+      {day: 52, morning: "كيمياء (مراجعة مركزة)", evening: "فيزياء (مراجعة مركزة)"},
+      {day: 53, morning: "إجازة", evening: "إجازة"},
+      {day: 54, morning: "رياضيات (حل امتحانات نهائية)", evening: "إنجليزي (حل امتحانات)"},
+      {day: 55, morning: "فيزياء (مراجعة عامة)", evening: "عربي (حل تدريبات)"},
+      {day: 56, morning: "كيمياء (حل نهائي)", evening: "رياضيات (مراجعة مركزة)"},
+      {day: 57, morning: "إجازة", evening: "إجازة"},
+      {day: 58, morning: "فيزياء (مراجعة خفيفة)", evening: "عربي (قراءة سريعة)"},
+      {day: 59, morning: "رياضيات (حل مسائل نهائية)", evening: "إنجليزي (مراجعة أخيرة)"},
+      {day: 60, morning: "إجازة خفيفة + راحة ذهنية", evening: "استعداد للامتحان"}
+];
+
+// تهيئة العناصر
+document.addEventListener('DOMContentLoaded', function() {
+    // تحميل البيانات من localStorage أو إنشاء جديدة
+    loadUserProgress();
+    
+    // إنشاء قائمة الأيام في العنصر select
+    populateDaySelect();
+    
+    // عرض بطاقات الأيام
+    renderDayCards();
+    
+    // تحديث العدادات
+    updateCountdowns();
+    
+    // تحديث كل ثانية
+    setInterval(updateCountdowns, 1000);
+    
+    // إضافة مستمعي الأحداث
+    document.getElementById('prevDay').addEventListener('click', () => {
+        if (currentSelectedDay > 1) {
+            currentSelectedDay--;
+            document.getElementById('daySelect').value = currentSelectedDay;
+            renderDayCards();
+        }
+    });
+    
+    document.getElementById('nextDay').addEventListener('click', () => {
+        if (currentSelectedDay < 60) {
+            currentSelectedDay++;
+            document.getElementById('daySelect').value = currentSelectedDay;
+            renderDayCards();
+        }
+    });
+    
+    document.getElementById('daySelect').addEventListener('change', (e) => {
+        currentSelectedDay = parseInt(e.target.value);
+        renderDayCards();
+    });
+    
+    // فحص المهام الفائتة
+    checkMissedTasks();
+});
+
+// تحميل بيانات المستخدم من localStorage
+function loadUserProgress() {
+    const savedProgress = localStorage.getItem('studyScheduleProgress');
+    
+    if (savedProgress) {
+        userProgress = JSON.parse(savedProgress);
+        programStartDate = new Date(userProgress.startDate);
+    } else {
+        // إنشاء بيانات جديدة
+        programStartDate = new Date();
+        
+        userProgress = {
+            startDate: programStartDate.toISOString(),
+            currentDay: calculateCurrentDay(programStartDate),
+            tasks: {}
+        };
+        
+        // تهيئة مهام كل يوم
+        for (let i = 1; i <= 60; i++) {
+            const dayData = scheduleData.find(d => d.day === i);
+            
+            userProgress.tasks[i] = {
+                morningCompleted: false,
+                eveningCompleted: false,
+                notes: '',
+                date: new Date(programStartDate.getTime() + ((i - 1) * 24 * 60 * 60 * 1000)).toISOString()
+            };
+        }
+        
+        saveUserProgress();
+    }
+    
+    currentSelectedDay = userProgress.currentDay;
+    
+    // عرض تاريخ البداية
+    document.getElementById('startDate').textContent = 'تاريخ البداية: ' + formatDate(new Date(userProgress.startDate));
+}
+
+// حفظ بيانات المستخدم في localStorage
+function saveUserProgress() {
+    localStorage.setItem('studyScheduleProgress', JSON.stringify(userProgress));
+}
+
+// حساب اليوم الحالي بناءً على تاريخ البداية
+function calculateCurrentDay(startDate) {
+    const now = new Date();
+    const diffTime = now - startDate;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    
+    return Math.min(Math.max(diffDays, 1), 60);
+}
+
+// ملء قائمة الأيام في العنصر select
+function populateDaySelect() {
+    const select = document.getElementById('daySelect');
+    
+    for (let i = 1; i <= 60; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = 'اليوم ' + i;
+        select.appendChild(option);
+    }
+    
+    select.value = currentSelectedDay;
+}
+
+// تحديث العدادات
+function updateCountdowns() {
+    const now = new Date();
+    
+    // تحديث التاريخ الحالي
+    document.getElementById('currentDate').textContent = 'اليوم: ' + formatDate(now);
+    
+    // حساب العد التنازلي الإجمالي
+    const startDate = new Date(userProgress.startDate);
+    const endDate = new Date(startDate.getTime() + (60 * 24 * 60 * 60 * 1000));
+    const totalRemaining = Math.max(0, endDate - now);
+    
+    document.getElementById('totalCountdown').textContent = formatCountdown(totalRemaining);
+    
+    // حساب الوقت المتبقي في اليوم الحالي
+    const tomorrow = new Date(now);
+    tomorrow.setHours(23, 59, 59, 999);
+    const dayRemaining = tomorrow - now;
+    
+    document.getElementById('dayCountdown').textContent = formatCountdownDay(dayRemaining);
+    
+    // تحديث اليوم الحالي إذا تغير
+    const calculatedDay = calculateCurrentDay(new Date(userProgress.startDate));
+    if (calculatedDay !== userProgress.currentDay) {
+        userProgress.currentDay = calculatedDay;
+        saveUserProgress();
+        
+        // تحديث العرض إذا كان المستخدم يعرض اليوم الحالي
+        if (currentSelectedDay === calculatedDay - 1) {
+            currentSelectedDay = calculatedDay;
+            document.getElementById('daySelect').value = currentSelectedDay;
+            renderDayCards();
+        }
+    }
+}
+
+// تنسيق العد التنازلي 
+function formatCountdown(timeInMs) {
+    if (timeInMs <= 0) {
+        return '00:00:00:00';
+    }
+    
+    const days = Math.floor(timeInMs / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeInMs % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeInMs % (1000 * 60)) / 1000);
+    
+    return `${days.toString().padStart(2, '0')}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// تنسيق العد التنازلي لليوم
+function formatCountdownDay(timeInMs) {
+    if (timeInMs <= 0) {
+        return '00:00:00';
+    }
+    
+    const hours = Math.floor(timeInMs / (1000 * 60 * 60));
+    const minutes = Math.floor((timeInMs % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeInMs % (1000 * 60)) / 1000);
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// تنسيق التاريخ
+function formatDate(date) {
+    return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+}
+
+// عرض بطاقات الأيام
+function renderDayCards() {
+    const grid = document.getElementById('tasksGrid');
+    grid.innerHTML = '';
+    
+    // تحديد نطاق الأيام للعرض (اليوم الحالي ± 2 أيام)
+    const startDay = Math.max(1, currentSelectedDay - 2);
+    const endDay = Math.min(60, currentSelectedDay + 2);
+    
+    for (let i = startDay; i <= endDay; i++) {
+        const dayData = scheduleData.find(d => d.day === i);
+        const progressData = userProgress.tasks[i] || {
+            morningCompleted: false,
+            eveningCompleted: false,
+            notes: ''
+        };
+        
+        const dayCard = document.createElement('div');
+        dayCard.className = 'day-card';
+        
+        // تحديد حالة البطاقة
+        if (i === userProgress.currentDay) {
+            dayCard.classList.add('active');
+        } else if (i < userProgress.currentDay && 
+                  (!progressData.morningCompleted || !progressData.eveningCompleted) && 
+                  (dayData.morning !== 'إجازة' || dayData.evening !== 'إجازة')) {
+            dayCard.classList.add('missed');
+        } else if (i < userProgress.currentDay && 
+                  progressData.morningCompleted && progressData.eveningCompleted) {
+            dayCard.classList.add('completed');
+        }
+        
+        // رأس البطاقة
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'day-header';
+        
+        const dayNumber = document.createElement('div');
+        dayNumber.className = 'day-number';
+        dayNumber.textContent = 'اليوم ' + i;
+        
+        const dayStatus = document.createElement('div');
+        dayStatus.className = 'day-status';
+        
+        if (i === userProgress.currentDay) {
+            dayStatus.textContent = 'اليوم';
+            dayStatus.classList.add('active');
+        } else if (i < userProgress.currentDay && 
+                  (!progressData.morningCompleted || !progressData.eveningCompleted) && 
+                  (dayData.morning !== 'إجازة' || dayData.evening !== 'إجازة')) {
+            dayStatus.textContent = 'فائت';
+            dayStatus.classList.add('missed');
+        } else if (i < userProgress.currentDay) {
+            dayStatus.textContent = 'مكتمل';
+            dayStatus.classList.add('completed');
+        } else {
+            dayStatus.textContent = 'قادم';
+            dayStatus.classList.add('upcoming');
+        }
+        
+        dayHeader.appendChild(dayNumber);
+        dayHeader.appendChild(dayStatus);
+        dayCard.appendChild(dayHeader);
+        
+        // تاريخ اليوم
+        const dayDate = document.createElement('div');
+        dayDate.className = 'date-display';
+        dayDate.style.fontSize = '14px';
+        dayDate.style.marginBottom = '10px';
+        dayDate.textContent = formatDate(new Date(progressData.date));
+        dayCard.appendChild(dayDate);
+        
+        // قائمة المهام
+        const taskList = document.createElement('div');
+        taskList.className = 'task-list';
+        
+        // مهمة الصباح
+        const morningTask = document.createElement('div');
+        morningTask.className = 'task-item';
+        
+        const morningTime = document.createElement('div');
+        morningTime.className = 'task-time';
+        morningTime.textContent = 'صباحاً:';
+        
+        const morningText = document.createElement('div');
+        morningText.className = 'task-text';
+        morningText.textContent = dayData.morning;
+        
+        const morningCheckbox = document.createElement('input');
+        morningCheckbox.type = 'checkbox';
+        morningCheckbox.className = 'task-checkbox';
+        morningCheckbox.checked = progressData.morningCompleted;
+        morningCheckbox.disabled = i > userProgress.currentDay;
+        
+        morningCheckbox.addEventListener('change', () => {
+            userProgress.tasks[i].morningCompleted = morningCheckbox.checked;
+            saveUserProgress();
+            renderDayCards();
+        });
+        
+        morningTask.appendChild(morningTime);
+        morningTask.appendChild(morningText);
+        morningTask.appendChild(morningCheckbox);
+        taskList.appendChild(morningTask);
+        
+        // مهمة المساء
+        const eveningTask = document.createElement('div');
+        eveningTask.className = 'task-item';
+        
+        const eveningTime = document.createElement('div');
+        eveningTime.className = 'task-time';
+        eveningTime.textContent = 'مساءً:';
+        
+        const eveningText = document.createElement('div');
+        eveningText.className = 'task-text';
+        eveningText.textContent = dayData.evening;
+        
+        const eveningCheckbox = document.createElement('input');
+        eveningCheckbox.type = 'checkbox';
+        eveningCheckbox.className = 'task-checkbox';
+        eveningCheckbox.checked = progressData.eveningCompleted;
+        eveningCheckbox.disabled = i > userProgress.currentDay;
+        
+        eveningCheckbox.addEventListener('change', () => {
+            userProgress.tasks[i].eveningCompleted = eveningCheckbox.checked;
+            saveUserProgress();
+            renderDayCards();
+        });
+        
+        eveningTask.appendChild(eveningTime);
+        eveningTask.appendChild(eveningText);
+        eveningTask.appendChild(eveningCheckbox);
+        taskList.appendChild(eveningTask);
+        
+        dayCard.appendChild(taskList);
+        
+        // حقل الملاحظات
+        const notesLabel = document.createElement('div');
+        notesLabel.textContent = 'ملاحظات:';
+        notesLabel.style.marginTop = '10px';
+        notesLabel.style.marginBottom = '5px';
+        notesLabel.style.fontWeight = 'bold';
+        
+        const notesArea = document.createElement('textarea');
+        notesArea.className = 'notes-area';
+        notesArea.value = progressData.notes || '';
+        notesArea.placeholder = 'أضف ملاحظاتك هنا...';
+        
+        notesArea.addEventListener('change', () => {
+            userProgress.tasks[i].notes = notesArea.value;
+            saveUserProgress();
+        });
+        
+        dayCard.appendChild(notesLabel);
+        dayCard.appendChild(notesArea);
+        
+        grid.appendChild(dayCard);
+    }
+}
+
+// فحص المهام الفائتة
+function checkMissedTasks() {
+    const alertBanner = document.getElementById('alertBanner');
+    let missedTasks = 0;
+    
+    for (let i = 1; i < userProgress.currentDay; i++) {
+        const dayData = scheduleData.find(d => d.day === i);
+        const progressData = userProgress.tasks[i];
+        
+        if (dayData && progressData) {
+            if ((dayData.morning !== 'إجازة' && !progressData.morningCompleted) || 
+                (dayData.evening !== 'إجازة' && !progressData.eveningCompleted)) {
+                missedTasks++;
+            }
+        }
+    }
+    
+    if (missedTasks > 0) {
+        alertBanner.textContent = `تنبيه: لديك ${missedTasks} مهام فائتة لم تكتمل بعد!`;
+        alertBanner.style.display = 'block';
+    } else {
+        alertBanner.style.display = 'none';
+    }
+}
+
+// إعادة تعيين البرنامج
+function resetProgram() {
+    if (confirm('هل أنت متأكد من رغبتك في إعادة تعيين البرنامج؟ سيتم حذف جميع بياناتك!')) {
+        localStorage.removeItem('studyScheduleProgress');
+        location.reload();
+    }
+}
+
+</script>
