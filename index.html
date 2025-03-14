@@ -500,66 +500,56 @@ let userProgress = {
 
 // بيانات الجدول - قم بإضافة بياناتك هنا
 const scheduleData = [
-{day: 1, morning: "إنجليزي (Unit 1)", evening: "فيزياء (باب 1)"},
-      {day: 2, morning: "كيمياء (باب 1)", evening: "رياضيات (وحدة 1 - جزء 1)"},
-      {day: 3, morning: "عربي (وحدة 1)", evening: "رياضيات (وحدة 1 - جزء 2)"},
-      {day: 4, morning: "إنجليزي (Unit 2)", evening: "فيزياء (باب 2)"},
-      {day: 5, morning: "كيمياء (باب 2)", evening: "عربي (وحدة 2)"},
-      {day: 6, morning: "إجازة", evening: "إجازة"},
-      {day: 7, morning: "رياضيات (وحدة 2 - جزء 1)", evening: "إنجليزي (Unit 3)"},
-      {day: 8, morning: "فيزياء (باب 3)", evening: "عربي (وحدة 3)"},
-      {day: 9, morning: "كيمياء (باب 3)", evening: "رياضيات (وحدة 2 - جزء 2)"},
-      {day: 10, morning: "إنجليزي (Unit 4)", evening: "فيزياء (باب 4)"},
-      {day: 11, morning: "عربي (وحدة 4)", evening: "كيمياء (باب 4)"},
-      {day: 12, morning: "إجازة", evening: "إجازة"},
-      {day: 13, morning: "رياضيات (وحدة 3 - جزء 1)", evening: "إنجليزي (Unit 5)"},
-      {day: 14, morning: "فيزياء (باب 5)", evening: "عربي (وحدة 5)"},
-      {day: 15, morning: "كيمياء (باب 5)", evening: "رياضيات (وحدة 3 - جزء 2)"},
-      {day: 16, morning: "إنجليزي (Unit 6)", evening: "فيزياء (باب 6)"},
-      {day: 17, morning: "عربي (وحدة 6)", evening: "كيمياء (باب 6)"},
-      {day: 18, morning: "إجازة", evening: "إجازة"},
-      {day: 19, morning: "رياضيات (وحدة 4 - جزء 1)", evening: "إنجليزي (Unit 7)"},
-      {day: 20, morning: "فيزياء (باب 7)", evening: "عربي (وحدة 7)"},
-      {day: 21, morning: "كيمياء (مراجعة عامة)", evening: "رياضيات (وحدة 4 - جزء 2)"},
-      {day: 22, morning: "إنجليزي (Unit 8)", evening: "فيزياء (باب 8)"},
-      {day: 23, morning: "عربي (وحدة 8)", evening: "رياضيات (وحدة 5 - جزء 1)"},
-      {day: 24, morning: "إجازة", evening: "إجازة"},
-      {day: 25, morning: "كيمياء (مراجعة وحل مسائل)", evening: "إنجليزي (Unit 9)"},
-      {day: 26, morning: "فيزياء (مراجعة وحل مسائل)", evening: "رياضيات (وحدة 5 - جزء 2)"},
-      {day: 27, morning: "عربي (وحدة 9)", evening: "رياضيات (وحدة 6 - جزء 1)"},
-      {day: 28, morning: "إنجليزي (Unit 10)", evening: "فيزياء (مراجعة قوانين)"},
-      {day: 29, morning: "كيمياء (حل مسائل مركزة)", evening: "رياضيات (وحدة 6 - جزء 2)"},
-      {day: 30, morning: "إجازة", evening: "إجازة"},
-      {day: 31, morning: "عربي (وحدة 10)", evening: "إنجليزي (Unit 11)"},
-      {day: 32, morning: "فيزياء (تطبيقات وحل امتحانات)", evening: "رياضيات (حل مسائل نهائية)"},
-      {day: 33, morning: "كيمياء (مراجعة مركزة)", evening: "رياضيات (تطبيقات وتمارين)"},
-      {day: 34, morning: "إنجليزي (Unit 12)", evening: "فيزياء (تطبيقات)"},
-      {day: 35, morning: "عربي (مراجعة عامة)", evening: "كيمياء (تطبيقات)"},
-      {day: 36, morning: "إجازة", evening: "إجازة"},
-      {day: 37, morning: "رياضيات (مراجعة شاملة للوحدات)", evening: "إنجليزي (مراجعة نهائية)"},
-      {day: 38, morning: "فيزياء (حل امتحانات نهائية)", evening: "عربي (حل تدريبات)"},
-      {day: 39, morning: "كيمياء (حل امتحانات نهائية)", evening: "رياضيات (مراجعة أخيرة)"},
-      {day: 40, morning: "إجازة", evening: "إجازة"},
-      {day: 41, morning: "فيزياء (مراجعة مركزة)", evening: "عربي (مراجعة مركزة)"},
-      {day: 42, morning: "رياضيات (حل مسائل إضافية)", evening: "إنجليزي (مراجعة سريعة)"},
-      {day: 43, morning: "كيمياء (حل مسائل إضافية)", evening: "عربي (مراجعة عامة)"},
-      {day: 44, morning: "فيزياء (حل امتحانات إضافية)", evening: "رياضيات (مراجعة مركزة)"},
-      {day: 45, morning: "إجازة", evening: "إجازة"},
-      {day: 46, morning: "كيمياء (حل امتحانات)", evening: "عربي (تطبيقات وتمارين)"},
-      {day: 47, morning: "فيزياء (حل مسائل)", evening: "إنجليزي (مراجعة سريعة)"},
-      {day: 48, morning: "رياضيات (تمارين مركزة)", evening: "كيمياء (مراجعة أخيرة)"},
-      {day: 49, morning: "إجازة", evening: "إجازة"},
-      {day: 50, morning: "فيزياء (حل امتحانات شاملة)", evening: "عربي (مراجعة مركزة)"},
-      {day: 51, morning: "رياضيات (حل مسائل مكثفة)", evening: "إنجليزي (حل أسئلة)"},
-      {day: 52, morning: "كيمياء (مراجعة مركزة)", evening: "فيزياء (مراجعة مركزة)"},
-      {day: 53, morning: "إجازة", evening: "إجازة"},
-      {day: 54, morning: "رياضيات (حل امتحانات نهائية)", evening: "إنجليزي (حل امتحانات)"},
-      {day: 55, morning: "فيزياء (مراجعة عامة)", evening: "عربي (حل تدريبات)"},
-      {day: 56, morning: "كيمياء (حل نهائي)", evening: "رياضيات (مراجعة مركزة)"},
-      {day: 57, morning: "إجازة", evening: "إجازة"},
-      {day: 58, morning: "فيزياء (مراجعة خفيفة)", evening: "عربي (قراءة سريعة)"},
-      {day: 59, morning: "رياضيات (حل مسائل نهائية)", evening: "إنجليزي (مراجعة أخيرة)"},
-      {day: 60, morning: "إجازة خفيفة + راحة ذهنية", evening: "استعداد للامتحان"}
+  {day: 1, morning: "إنجليزي (Unit 1)", evening: "فيزياء (باب 1 - جزء 1)"},
+  {day: 2, morning: "كيمياء (باب 1 - جزء 1)", evening: "رياضيات (وحدة 1 - جزء 1)"},
+  {day: 3, morning: "عربي (وحدة 1)", evening: "فيزياء (باب 1 - جزء 2)"},
+  {day: 4, morning: "إنجليزي (Unit 2)", evening: "رياضيات (وحدة 1 - جزء 2)"},
+  {day: 5, morning: "كيمياء (باب 1 - جزء 2)", evening: "عربي (وحدة 2)"},
+  {day: 6, morning: "إجازة", evening: "إجازة"},
+  {day: 7, morning: "رياضيات (وحدة 2 - جزء 1)", evening: "إنجليزي (Unit 3)"},
+  {day: 8, morning: "فيزياء (باب 2 - جزء 1)", evening: "عربي (وحدة 3)"},
+  {day: 9, morning: "كيمياء (باب 2 - جزء 1)", evening: "رياضيات (وحدة 2 - جزء 2)"},
+  {day: 10, morning: "إنجليزي (Unit 4)", evening: "فيزياء (باب 2 - جزء 2)"},
+  {day: 11, morning: "عربي (وحدة 4)", evening: "كيمياء (باب 2 - جزء 2)"},
+  {day: 12, morning: "إجازة", evening: "إجازة"},
+  {day: 13, morning: "رياضيات (وحدة 3 - جزء 1)", evening: "إنجليزي (Unit 5)"},
+  {day: 14, morning: "فيزياء (باب 3 - جزء 1)", evening: "عربي (وحدة 5)"},
+  {day: 15, morning: "كيمياء (باب 3 - جزء 1)", evening: "رياضيات (وحدة 3 - جزء 2)"},
+  {day: 16, morning: "إنجليزي (Unit 6)", evening: "فيزياء (باب 3 - جزء 2)"},
+  {day: 17, morning: "عربي (وحدة 6)", evening: "كيمياء (باب 3 - جزء 2)"},
+  {day: 18, morning: "إجازة", evening: "إجازة"},
+  {day: 19, morning: "رياضيات (وحدة 4 - جزء 1)", evening: "إنجليزي (Unit 7)"},
+  {day: 20, morning: "فيزياء (باب 4 - جزء 1)", evening: "عربي (وحدة 7)"},
+  {day: 21, morning: "كيمياء (باب 4 - جزء 1)", evening: "رياضيات (وحدة 4 - جزء 2)"},
+  {day: 22, morning: "إنجليزي (Unit 8)", evening: "فيزياء (باب 4 - جزء 2)"},
+  {day: 23, morning: "عربي (وحدة 8)", evening: "رياضيات (وحدة 5 - جزء 1)"},
+  {day: 24, morning: "إجازة", evening: "إجازة"},
+  {day: 25, morning: "كيمياء (باب 4 - جزء 2)", evening: "إنجليزي (Unit 9)"},
+  {day: 26, morning: "فيزياء (باب 5 - جزء 1)", evening: "رياضيات (وحدة 5 - جزء 2)"},
+  {day: 27, morning: "عربي (وحدة 9)", evening: "رياضيات (وحدة 6 - جزء 1)"},
+  {day: 28, morning: "إنجليزي (Unit 10)", evening: "فيزياء (باب 5 - جزء 2)"},
+  {day: 29, morning: "كيمياء (مراجعة) ", evening: "رياضيات (وحدة 6 - جزء 2)"},
+  {day: 30, morning: "إجازة", evening: "إجازة"},
+  {day: 31, morning: "عربي (مراجعة)", evening: "إنجليزي (مراجعة)"},
+  {day: 32, morning: "فيزياء (مراجعة)", evening: "رياضيات (مراجعة)"},
+  {day: 33, morning: "كيمياء (حل مسائل)", evening: "إنجليزي (تطبيقات)"},
+  {day: 34, morning: "رياضيات (حل مسائل)", evening: "عربي (تدريبات)"},
+  {day: 35, morning: "فيزياء (تدريبات)", evening: "كيمياء (حل امتحانات)"},
+  {day: 36, morning: "إجازة", evening: "إجازة"},
+  {day: 37, morning: "رياضيات (مراجعة شاملة)", evening: "فيزياء (تطبيقات)"},
+  {day: 38, morning: "إنجليزي (مراجعة عامة)", evening: "عربي (حل امتحانات)"},
+  {day: 39, morning: "كيمياء (تدريبات إضافية)", evening: "رياضيات (مراجعة مركزة)"},
+  {day: 40, morning: "إجازة", evening: "إجازة"},
+  {day: 41, morning: "فيزياء (مراجعة مركزة)", evening: "عربي (مراجعة مركزة)"},
+  {day: 42, morning: "رياضيات (حل مسائل إضافية)", evening: "إنجليزي (مراجعة سريعة)"},
+  {day: 43, morning: "كيمياء (حل مسائل إضافية)", evening: "عربي (مراجعة عامة)"},
+  {day: 44, morning: "فيزياء (حل امتحانات إضافية)", evening: "رياضيات (مراجعة مركزة)"},
+  {day: 45, morning: "إجازة", evening: "إجازة"},
+  {day: 46, morning: "كيمياء (حل امتحانات)", evening: "عربي (تطبيقات وتمارين)"},
+  {day: 47, morning: "فيزياء (حل مسائل)", evening: "إنجليزي (مراجعة سريعة)"},
+  {day: 48, morning: "رياضيات (تمارين مركزة)", evening: "كيمياء (مراجعة أخيرة)"},
+  {day: 49, morning: "إجازة", evening: "إجازة"},
+  {day: 50, morning: "استعداد للامتحان", evening: "راحة ذهنية"}
 ];
 
 // تهيئة العناصر
@@ -766,9 +756,13 @@ function renderDayCards() {
         dayCard.className = 'day-card';
         
         // تحديد حالة البطاقة
+        const taskDate = new Date(progressData.date);
+        const now = new Date();
+        const isOverdue = taskDate < now && taskDate.getDate() !== now.getDate();
+        
         if (i === userProgress.currentDay) {
             dayCard.classList.add('active');
-        } else if (i < userProgress.currentDay && 
+        } else if (isOverdue && 
                   (!progressData.morningCompleted || !progressData.eveningCompleted) && 
                   (dayData.morning !== 'إجازة' || dayData.evening !== 'إجازة')) {
             dayCard.classList.add('missed');
@@ -791,7 +785,7 @@ function renderDayCards() {
         if (i === userProgress.currentDay) {
             dayStatus.textContent = 'اليوم';
             dayStatus.classList.add('active');
-        } else if (i < userProgress.currentDay && 
+        } else if (isOverdue && 
                   (!progressData.morningCompleted || !progressData.eveningCompleted) && 
                   (dayData.morning !== 'إجازة' || dayData.evening !== 'إجازة')) {
             dayStatus.textContent = 'فائت';
@@ -813,6 +807,8 @@ function renderDayCards() {
         dayDate.className = 'date-display';
         dayDate.style.fontSize = '14px';
         dayDate.style.marginBottom = '10px';
+        dayDate.style.color = isOverdue ? '#f44336' : '#666';
+        dayDate.style.fontWeight = isOverdue ? 'bold' : 'normal';
         dayDate.textContent = formatDate(new Date(progressData.date));
         dayCard.appendChild(dayDate);
         
