@@ -402,6 +402,112 @@
                 grid-template-columns: 1fr;
             }
         }
+        
+        /* أنماط قسم الإحصائيات */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stats-box {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .stats-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .stats-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .stats-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #3f51b5;
+            margin-bottom: 5px;
+        }
+        
+        .stats-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* أنماط المهام حسب المادة */
+        .task-item.math-task {
+            border-right: 4px solid #4CAF50;
+        }
+        
+        .task-item.physics-task {
+            border-right: 4px solid #2196F3;
+        }
+        
+        .task-item.chemistry-task {
+            border-right: 4px solid #9C27B0;
+        }
+        
+        .task-item.arabic-task {
+            border-right: 4px solid #FF9800;
+        }
+        
+        .task-item.english-task {
+            border-right: 4px solid #F44336;
+        }
+        
+        /* زر إعادة التعيين */
+        .reset-button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+        
+        .reset-button:hover {
+            background-color: #d32f2f;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* زر تصدير الملاحظات */
+        .export-button {
+            background: linear-gradient(135deg, #4a6bff 0%, #3f51b5 100%);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .export-button:hover {
+            background: linear-gradient(135deg, #3f51b5 0%, #303f9f 100%);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* تحسينات للهواتف المحمولة */
+        @media (max-width: 768px) {
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            /* ... existing code ... */
+        }
     </style>
 </head>
 <body>
@@ -409,9 +515,34 @@
         <header>
             <h1>مراقبة جدول المذاكرة 60 يوم</h1>
             <p>تتبع تقدمك اليومي وحقق أهدافك</p>
+            <button id="resetBtn" class="reset-button">إعادة تعيين البرنامج</button>
         </header>
         
         <div class="alert-banner" id="alertBanner"></div>
+        
+        <!-- إضافة قسم الإحصائيات -->
+        <div class="stats-section">
+            <div class="stats-box">
+                <div class="stats-icon">📊</div>
+                <div class="stats-value" id="completionRate">0%</div>
+                <div class="stats-label">نسبة الإنجاز</div>
+            </div>
+            <div class="stats-box">
+                <div class="stats-icon">✅</div>
+                <div class="stats-value" id="completedTasks">0</div>
+                <div class="stats-label">المهام المكتملة</div>
+            </div>
+            <div class="stats-box">
+                <div class="stats-icon">⏱️</div>
+                <div class="stats-value" id="streakDays">0</div>
+                <div class="stats-label">أيام متتالية</div>
+            </div>
+            <div class="stats-box">
+                <div class="stats-icon">🏆</div>
+                <div class="stats-value" id="bestSubject">-</div>
+                <div class="stats-label">المادة الأفضل</div>
+            </div>
+        </div>
         
         <div class="timer-section">
             <div class="timer-box">
@@ -495,7 +626,9 @@ let programStartDate = null;
 let currentSelectedDay = 1;
 let userProgress = {
     currentDay: 1,
-    tasks: {}
+    tasks: {},
+    streak: 0,
+    lastCompletedDay: 0
 };
 
 // بيانات الجدول - قم بإضافة بياناتك هنا
@@ -605,6 +738,14 @@ function loadUserProgress() {
     if (savedProgress) {
         userProgress = JSON.parse(savedProgress);
         programStartDate = new Date(userProgress.startDate);
+        
+        // إضافة خصائص جديدة إذا لم تكن موجودة (للتوافق مع التحديثات)
+        if (!userProgress.hasOwnProperty('streak')) {
+            userProgress.streak = 0;
+        }
+        if (!userProgress.hasOwnProperty('lastCompletedDay')) {
+            userProgress.lastCompletedDay = 0;
+        }
     } else {
         // إنشاء بيانات جديدة
         programStartDate = new Date();
@@ -612,12 +753,14 @@ function loadUserProgress() {
         userProgress = {
             startDate: programStartDate.toISOString(),
             currentDay: calculateCurrentDay(programStartDate),
-            tasks: {}
+            tasks: {},
+            streak: 0,
+            lastCompletedDay: 0
         };
         
         // تهيئة مهام كل يوم
         for (let i = 1; i <= 60; i++) {
-            const dayData = scheduleData.find(d => d.day === i);
+            const dayData = scheduleData.find(d => d.day === i) || { morning: 'غير محدد', evening: 'غير محدد' };
             
             userProgress.tasks[i] = {
                 morningCompleted: false,
@@ -635,13 +778,20 @@ function loadUserProgress() {
     // عرض تاريخ البداية
     document.getElementById('startDate').textContent = 'تاريخ البداية: ' + formatDate(new Date(userProgress.startDate));
     
-    // تحديث أشرطة التقدم
+    // تحديث أشرطة التقدم والإحصائيات
     updateProgressBars();
+    updateStatistics();
+    
+    // إضافة مستمع لزر إعادة التعيين
+    document.getElementById('resetBtn').addEventListener('click', resetProgram);
 }
 
 // حفظ بيانات المستخدم في localStorage
 function saveUserProgress() {
     localStorage.setItem('studyScheduleProgress', JSON.stringify(userProgress));
+    
+    // تحديث الإحصائيات بعد كل حفظ
+    updateStatistics();
 }
 
 // حساب اليوم الحالي بناءً على تاريخ البداية
@@ -745,7 +895,7 @@ function renderDayCards() {
     const endDay = Math.min(60, currentSelectedDay + 2);
     
     for (let i = startDay; i <= endDay; i++) {
-        const dayData = scheduleData.find(d => d.day === i);
+        const dayData = scheduleData.find(d => d.day === i) || { morning: 'غير محدد', evening: 'غير محدد' };
         const progressData = userProgress.tasks[i] || {
             morningCompleted: false,
             eveningCompleted: false,
@@ -820,6 +970,12 @@ function renderDayCards() {
         const morningTask = document.createElement('div');
         morningTask.className = 'task-item';
         
+        // إضافة تصنيف المادة للمهمة
+        const subjectClass = getSubjectClass(dayData.morning);
+        if (subjectClass) {
+            morningTask.classList.add(subjectClass);
+        }
+        
         const morningTime = document.createElement('div');
         morningTime.className = 'task-time';
         morningTime.textContent = 'صباحاً:';
@@ -839,6 +995,7 @@ function renderDayCards() {
             saveUserProgress();
             renderDayCards();
             updateProgressBars();
+            updateStreak();
         });
         
         morningTask.appendChild(morningTime);
@@ -849,6 +1006,12 @@ function renderDayCards() {
         // مهمة المساء
         const eveningTask = document.createElement('div');
         eveningTask.className = 'task-item';
+        
+        // إضافة تصنيف المادة للمهمة
+        const eveningSubjectClass = getSubjectClass(dayData.evening);
+        if (eveningSubjectClass) {
+            eveningTask.classList.add(eveningSubjectClass);
+        }
         
         const eveningTime = document.createElement('div');
         eveningTime.className = 'task-time';
@@ -869,6 +1032,7 @@ function renderDayCards() {
             saveUserProgress();
             renderDayCards();
             updateProgressBars();
+            updateStreak();
         });
         
         eveningTask.appendChild(eveningTime);
@@ -898,33 +1062,180 @@ function renderDayCards() {
         dayCard.appendChild(notesLabel);
         dayCard.appendChild(notesArea);
         
+        // إضافة زر لتصدير الملاحظات
+        if (progressData.notes && progressData.notes.trim() !== '') {
+            const exportButton = document.createElement('button');
+            exportButton.className = 'export-button';
+            exportButton.textContent = 'تصدير الملاحظات';
+            exportButton.addEventListener('click', () => {
+                exportNotes(i, progressData.notes);
+            });
+            dayCard.appendChild(exportButton);
+        }
+        
         grid.appendChild(dayCard);
     }
 }
 
-// فحص المهام الفائتة
-function checkMissedTasks() {
-    const alertBanner = document.getElementById('alertBanner');
-    let missedTasks = 0;
+// تحديد فئة المادة بناءً على النص
+function getSubjectClass(taskText) {
+    if (!taskText) return null;
     
-    for (let i = 1; i < userProgress.currentDay; i++) {
-        const dayData = scheduleData.find(d => d.day === i);
+    if (taskText.includes('رياضيات')) {
+        return 'math-task';
+    } else if (taskText.includes('فيزياء')) {
+        return 'physics-task';
+    } else if (taskText.includes('كيمياء')) {
+        return 'chemistry-task';
+    } else if (taskText.includes('عربي')) {
+        return 'arabic-task';
+    } else if (taskText.includes('إنجليزي')) {
+        return 'english-task';
+    }
+    return null;
+}
+
+// تصدير الملاحظات كملف نصي
+function exportNotes(day, notes) {
+    const blob = new Blob([notes], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ملاحظات_اليوم_${day}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// تحديث سلسلة الأيام المتتالية
+function updateStreak() {
+    const currentDay = userProgress.currentDay;
+    
+    // التحقق من اكتمال اليوم الحالي
+    const todayData = userProgress.tasks[currentDay];
+    const todaySchedule = scheduleData.find(d => d.day === currentDay) || { morning: 'غير محدد', evening: 'غير محدد' };
+    
+    const isTodayCompleted = 
+        (todaySchedule.morning === 'إجازة' || todayData.morningCompleted) && 
+        (todaySchedule.evening === 'إجازة' || todayData.eveningCompleted);
+    
+    // إذا كان اليوم الحالي مكتمل وهو اليوم التالي للسلسلة السابقة
+    if (isTodayCompleted && userProgress.lastCompletedDay === currentDay - 1) {
+        userProgress.streak++;
+        userProgress.lastCompletedDay = currentDay;
+    } 
+    // إذا كان اليوم الحالي مكتمل ولكن السلسلة انقطعت
+    else if (isTodayCompleted && userProgress.lastCompletedDay !== currentDay) {
+        userProgress.streak = 1;
+        userProgress.lastCompletedDay = currentDay;
+    }
+    
+    saveUserProgress();
+}
+
+// تحديث الإحصائيات
+function updateStatistics() {
+    // حساب نسبة الإنجاز
+    let totalTasks = 0;
+    let completedTasks = 0;
+    
+    // حساب التقدم لكل مادة
+    let subjects = {
+        math: { total: 0, completed: 0 },
+        physics: { total: 0, completed: 0 },
+        chemistry: { total: 0, completed: 0 },
+        arabic: { total: 0, completed: 0 },
+        english: { total: 0, completed: 0 }
+    };
+    
+    // مرور على جميع المهام وحساب التقدم
+    for (let i = 1; i <= 60; i++) {
+        const dayData = scheduleData.find(d => d.day === i) || { morning: 'غير محدد', evening: 'غير محدد' };
         const progressData = userProgress.tasks[i];
         
         if (dayData && progressData) {
-            if ((dayData.morning !== 'إجازة' && !progressData.morningCompleted) || 
-                (dayData.evening !== 'إجازة' && !progressData.eveningCompleted)) {
-                missedTasks++;
+            // حساب المهام الصباحية
+            if (dayData.morning !== 'إجازة') {
+                totalTasks++;
+                if (progressData.morningCompleted) {
+                    completedTasks++;
+                }
+                
+                // تحديد المادة وإضافتها للحساب
+                if (dayData.morning.includes('رياضيات')) {
+                    subjects.math.total++;
+                    if (progressData.morningCompleted) subjects.math.completed++;
+                } else if (dayData.morning.includes('فيزياء')) {
+                    subjects.physics.total++;
+                    if (progressData.morningCompleted) subjects.physics.completed++;
+                } else if (dayData.morning.includes('كيمياء')) {
+                    subjects.chemistry.total++;
+                    if (progressData.morningCompleted) subjects.chemistry.completed++;
+                } else if (dayData.morning.includes('عربي')) {
+                    subjects.arabic.total++;
+                    if (progressData.morningCompleted) subjects.arabic.completed++;
+                } else if (dayData.morning.includes('إنجليزي')) {
+                    subjects.english.total++;
+                    if (progressData.morningCompleted) subjects.english.completed++;
+                }
+            }
+            
+            // حساب المهام المسائية
+            if (dayData.evening !== 'إجازة') {
+                totalTasks++;
+                if (progressData.eveningCompleted) {
+                    completedTasks++;
+                }
+                
+                // تحديد المادة وإضافتها للحساب
+                if (dayData.evening.includes('رياضيات')) {
+                    subjects.math.total++;
+                    if (progressData.eveningCompleted) subjects.math.completed++;
+                } else if (dayData.evening.includes('فيزياء')) {
+                    subjects.physics.total++;
+                    if (progressData.eveningCompleted) subjects.physics.completed++;
+                } else if (dayData.evening.includes('كيمياء')) {
+                    subjects.chemistry.total++;
+                    if (progressData.eveningCompleted) subjects.chemistry.completed++;
+                } else if (dayData.evening.includes('عربي')) {
+                    subjects.arabic.total++;
+                    if (progressData.eveningCompleted) subjects.arabic.completed++;
+                } else if (dayData.evening.includes('إنجليزي')) {
+                    subjects.english.total++;
+                    if (progressData.eveningCompleted) subjects.english.completed++;
+                }
             }
         }
     }
     
-    if (missedTasks > 0) {
-        alertBanner.textContent = `تنبيه: لديك ${missedTasks} مهام فائتة لم تكتمل بعد!`;
-        alertBanner.style.display = 'block';
-    } else {
-        alertBanner.style.display = 'none';
+    // تحديث الإحصائيات في واجهة المستخدم
+    const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    document.getElementById('completionRate').textContent = completionRate + '%';
+    document.getElementById('completedTasks').textContent = completedTasks;
+    document.getElementById('streakDays').textContent = userProgress.streak;
+    
+    // تحديد المادة الأفضل
+    let bestSubject = 'لا يوجد';
+    let bestPercentage = 0;
+    
+    for (const [subject, data] of Object.entries(subjects)) {
+        if (data.total > 0) {
+            const percentage = Math.round((data.completed / data.total) * 100);
+            if (percentage > bestPercentage) {
+                bestPercentage = percentage;
+                switch(subject) {
+                    case 'math': bestSubject = 'رياضيات'; break;
+                    case 'physics': bestSubject = 'فيزياء'; break;
+                    case 'chemistry': bestSubject = 'كيمياء'; break;
+                    case 'arabic': bestSubject = 'عربي'; break;
+                    case 'english': bestSubject = 'إنجليزي'; break;
+                }
+            }
+        }
     }
+    
+    document.getElementById('bestSubject').textContent = bestSubject;
 }
 
 // إعادة تعيين البرنامج
