@@ -741,7 +741,6 @@ const scheduleData = [
   {day: 51, morning: "فيزياء (مراجعة نهائية)", evening: "كيمياء (مراجعة نهائية)"},
   {day: 52, morning: "عربي (مراجعة نهائية)", evening: "استعداد للامتحان"},
   {day: 53, morning: "مراجعة آخر يوم", evening: "راحة ذهنية"},
-
   {day: 54, morning: "إنجليزي (حل امتحانات سابقة)", evening: "رياضيات (حل امتحانات سابقة)"},
   {day: 55, morning: "فيزياء (حل مسائل صعبة)", evening: "كيمياء (حل مسائل صعبة)"},
   {day: 56, morning: "عربي (تدريبات مكثفة)", evening: "إنجليزي (تدريبات مكثفة)"},
@@ -906,7 +905,7 @@ function updateCountdowns() {
     
     // تحديث اليوم الحالي إذا تغير
     const calculatedDay = calculateCurrentDay(new Date(userProgress.startDate));
-    if (calculatedDay !== userProgress.currentDay) {
+    if (calculatedDay !== userProgress.currentDay && calculatedDay <= 60) {
         userProgress.currentDay = calculatedDay;
         saveUserProgress();
         
@@ -965,7 +964,8 @@ function renderDayCards() {
         const progressData = userProgress.tasks[i] || {
             morningCompleted: false,
             eveningCompleted: false,
-            notes: ''
+            notes: '',
+            date: new Date(programStartDate.getTime() + ((i - 1) * 24 * 60 * 60 * 1000)).toISOString()
         };
         
         const dayCard = document.createElement('div');
@@ -1069,42 +1069,44 @@ function renderDayCards() {
         morningTask.appendChild(morningCheckbox);
         taskList.appendChild(morningTask);
         
-        // مهمة المساء
-        const eveningTask = document.createElement('div');
-        eveningTask.className = 'task-item';
-        
-        // إضافة تصنيف المادة للمهمة
-        const eveningSubjectClass = getSubjectClass(dayData.evening);
-        if (eveningSubjectClass) {
-            eveningTask.classList.add(eveningSubjectClass);
+        // مهمة المساء - تحقق من وجود مهمة مسائية
+        if (dayData.evening !== null) {
+            const eveningTask = document.createElement('div');
+            eveningTask.className = 'task-item';
+            
+            // إضافة تصنيف المادة للمهمة
+            const eveningSubjectClass = getSubjectClass(dayData.evening);
+            if (eveningSubjectClass) {
+                eveningTask.classList.add(eveningSubjectClass);
+            }
+            
+            const eveningTime = document.createElement('div');
+            eveningTime.className = 'task-time';
+            eveningTime.textContent = 'مساءً:';
+            
+            const eveningText = document.createElement('div');
+            eveningText.className = 'task-text';
+            eveningText.textContent = dayData.evening || 'لا توجد مهمة';
+            
+            const eveningCheckbox = document.createElement('input');
+            eveningCheckbox.type = 'checkbox';
+            eveningCheckbox.className = 'task-checkbox';
+            eveningCheckbox.checked = progressData.eveningCompleted;
+            eveningCheckbox.disabled = i > userProgress.currentDay || dayData.evening === null;
+            
+            eveningCheckbox.addEventListener('change', () => {
+                userProgress.tasks[i].eveningCompleted = eveningCheckbox.checked;
+                saveUserProgress();
+                renderDayCards();
+                updateProgressBars();
+                updateStreak();
+            });
+            
+            eveningTask.appendChild(eveningTime);
+            eveningTask.appendChild(eveningText);
+            eveningTask.appendChild(eveningCheckbox);
+            taskList.appendChild(eveningTask);
         }
-        
-        const eveningTime = document.createElement('div');
-        eveningTime.className = 'task-time';
-        eveningTime.textContent = 'مساءً:';
-        
-        const eveningText = document.createElement('div');
-        eveningText.className = 'task-text';
-        eveningText.textContent = dayData.evening;
-        
-        const eveningCheckbox = document.createElement('input');
-        eveningCheckbox.type = 'checkbox';
-        eveningCheckbox.className = 'task-checkbox';
-        eveningCheckbox.checked = progressData.eveningCompleted;
-        eveningCheckbox.disabled = i > userProgress.currentDay;
-        
-        eveningCheckbox.addEventListener('change', () => {
-            userProgress.tasks[i].eveningCompleted = eveningCheckbox.checked;
-            saveUserProgress();
-            renderDayCards();
-            updateProgressBars();
-            updateStreak();
-        });
-        
-        eveningTask.appendChild(eveningTime);
-        eveningTask.appendChild(eveningText);
-        eveningTask.appendChild(eveningCheckbox);
-        taskList.appendChild(eveningTask);
         
         dayCard.appendChild(taskList);
         
@@ -1222,7 +1224,7 @@ function updateStatistics() {
         
         if (dayData && progressData) {
             // حساب المهام الصباحية
-            if (dayData.morning !== 'إجازة') {
+            if (dayData.morning && dayData.morning !== 'إجازة') {
                 totalTasks++;
                 if (progressData.morningCompleted) {
                     completedTasks++;
@@ -1248,7 +1250,7 @@ function updateStatistics() {
             }
             
             // حساب المهام المسائية
-            if (dayData.evening !== 'إجازة') {
+            if (dayData.evening && dayData.evening !== 'إجازة') {
                 totalTasks++;
                 if (progressData.eveningCompleted) {
                     completedTasks++;
@@ -1334,7 +1336,7 @@ function updateProgressBars() {
         
         if (dayData && progressData) {
             // حساب المهام الصباحية
-            if (dayData.morning !== 'إجازة') {
+            if (dayData.morning && dayData.morning !== 'إجازة') {
                 totalTasks++;
                 if (progressData.morningCompleted) {
                     completedTasks++;
@@ -1360,7 +1362,7 @@ function updateProgressBars() {
             }
             
             // حساب المهام المسائية
-            if (dayData.evening !== 'إجازة') {
+            if (dayData.evening && dayData.evening !== 'إجازة') {
                 totalTasks++;
                 if (progressData.eveningCompleted) {
                     completedTasks++;
@@ -1415,6 +1417,35 @@ function updateProgressBar(barId, textId, percentage) {
     
     // تحديث النص
     text.textContent = percentage + '%';
+}
+
+// فحص المهام الفائتة
+function checkMissedTasks() {
+    // تنفيذ فحص المهام الفائتة
+    const now = new Date();
+    let missedTasksFound = false;
+    
+    for (let i = 1; i < userProgress.currentDay; i++) {
+        const dayData = scheduleData.find(d => d.day === i) || { morning: 'غير محدد', evening: 'غير محدد' };
+        const progressData = userProgress.tasks[i];
+        
+        if (dayData && progressData) {
+            if ((dayData.morning !== 'إجازة' && !progressData.morningCompleted) || 
+                (dayData.evening !== 'إجازة' && dayData.evening !== null && !progressData.eveningCompleted)) {
+                missedTasksFound = true;
+                break;
+            }
+        }
+    }
+    
+    // عرض تنبيه إذا كانت هناك مهام فائتة
+    const alertBanner = document.getElementById('alertBanner');
+    if (missedTasksFound) {
+        alertBanner.textContent = 'لديك مهام فائتة! تحقق من الأيام السابقة لإكمالها.';
+        alertBanner.style.display = 'block';
+    } else {
+        alertBanner.style.display = 'none';
+    }
 }
 
 </script>
